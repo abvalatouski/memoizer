@@ -12,7 +12,7 @@ class Memoizer t where
     -- Rep t
     type Arg t
 
-    -- Helps memoizer to know all possible function results.
+    -- Helps memoizer to know all possible function inputs.
     type DomainHint t
 
     -- index

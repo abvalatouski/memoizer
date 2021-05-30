@@ -33,7 +33,7 @@ class Memoizer t where
     --   Similar to @Rep t@.
     type Arg t
 
-    -- | Helps memoizer to store all the function inputs.
+    -- Helps memoizer to know all possible function inputs.
     type DomainHint t
 
     -- | Applies the function to the argument.
