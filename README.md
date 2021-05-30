@@ -16,7 +16,7 @@ class Memoizer t where
     type DomainHint t
 
     -- index
-    apply :: t a -> Arg t -> t a
+    apply :: t a -> Arg t -> a
 
     -- tabulate
     memoize :: (Arg t -> a) -> DomainHint t -> t a
