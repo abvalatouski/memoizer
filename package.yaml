@@ -1,0 +1,17 @@
+name:     memoizer
+synopsis: An alternative to representable functors.
+version:  0.0.1
+category: Data
+author:   Aliaksei Valatouski
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Control.Comonad.Memoized.Store
+    - Data.Memoizer
+  dependencies:
+    - base
+    - comonad
+    - hashable
+    - unordered-containers
+    - vector

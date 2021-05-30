@@ -1,0 +1,4 @@
+cradle:
+  stack:
+    - component: memoizer:lib
+      path:      src
