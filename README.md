@@ -31,7 +31,7 @@ The library also provides `Store` comonad that uses `Memoizer` under the hood.
 
 ```haskell
 data Store memoizer a
-    = Store (memoizer a) (DomainHint a) (Arg a)
+    = Store (memoizer a) (DomainHint memoizer) (Arg memoizer)
 ```
 
 Currently there is no transformer.
