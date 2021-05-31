@@ -3,8 +3,8 @@
 -- |
 -- Module : Data.Memoizer
 --
--- Provides an alternative to 'Representable' 'Functor'
--- from [@adjunctions@](https://hackage.haskell.org/package/adjunctions) package, that is suitable
+-- Provides an alternative to 'Representable' 'Functor's
+-- (from [@adjunctions@](https://hackage.haskell.org/package/adjunctions)), that is suitable
 -- for containers with size known only at runtime. The only difference between those type classes
 -- is that `Memoizer` passes helper information to the `tabulate` function.
 module Data.Memoizer
@@ -16,6 +16,7 @@ module Data.Memoizer
         , memoize
         )
     , Memoizing
+
       -- * Wrapping 'Representable' 'Functor's
     , WrappedRepresentable
         ( WrapRepresentable
@@ -44,7 +45,11 @@ class Memoizer t where
     --   Similar to 'Rep'.
     type Arg t
 
-    -- Helps memoizer to know all possible function inputs.
+    -- | Helps memoizer to know all possible function inputs (i.e. /domain/).
+    --
+    --   Generally speaking, it should be represented as a list of values. However, in some cases,
+    --   the list can be stored /implicitly/. For example, an array of values, as a function
+    --   from an integer to something, can figure out its inputs, knowing only their amount.
     type DomainHint t
 
     -- | Applies the function to the argument.
@@ -86,12 +91,12 @@ instance Memoizer IntMap where
     apply        = (IntMap.!)
     memoize f ks = let vs = map f ks in IntMap.fromList $ zip ks vs
 
--- | Used to define 'Memoizer' to 'Representable' instances.
+-- | Used to derive 'Memoizer' instances for all 'Representable' 'Functor's.
 newtype WrappedRepresentable f a = WrapRepresentable
     { getWrappedRepresentable :: f a
     }
 
--- | Uses '()' as its 'DomainHint'.
+-- | Uses @()@ as its 'DomainHint'.
 instance Representable f => Memoizer (WrappedRepresentable f) where
     type Arg        (WrappedRepresentable f) = Rep f
     type DomainHint (WrappedRepresentable f) = ()
@@ -101,5 +106,5 @@ instance Representable f => Memoizer (WrappedRepresentable f) where
 
 -- | Memoizing functor.
 --
---   Used to shorten some constraints.
+--   Used when is too boring to write two constraints instead of one.
 class (Functor f, Memoizer f) => Memoizing f
