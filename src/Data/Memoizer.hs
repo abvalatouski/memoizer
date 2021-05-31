@@ -49,7 +49,9 @@ class Memoizer t where
     --
     --   Generally speaking, it should be represented as a list of values. However, in some cases,
     --   the list can be stored /implicitly/. For example, an array of values, as a function
-    --   from an integer to something, can figure out its inputs, knowing only their amount.
+    --   from an integer to something, can figure out its inputs, knowing only the amount of them.
+    --   Also all the 'Representable' 'Functor's already know their inputs, so they define
+    --   'DomainHint' as @()@.
     type DomainHint t
 
     -- | Applies the function to the argument.
@@ -62,7 +64,6 @@ class Memoizer t where
     --   Similar to 'tabulate'.
     memoize :: (Arg t -> a) -> DomainHint t -> t a
 
--- | Uses length of the 'Vector' as its 'DomainHint'.
 instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
@@ -96,7 +97,6 @@ newtype WrappedRepresentable f a = WrapRepresentable
     { getWrappedRepresentable :: f a
     }
 
--- | Uses @()@ as its 'DomainHint'.
 instance Representable f => Memoizer (WrappedRepresentable f) where
     type Arg        (WrappedRepresentable f) = Rep f
     type DomainHint (WrappedRepresentable f) = ()
