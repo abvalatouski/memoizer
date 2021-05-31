@@ -1,7 +1,7 @@
 # An alternative to representable functors
 
 The library provides a `Memoizer` type class similar to `Representable`
-from [`adjunctions`](https://hackage.haskell.org/package/adjunctions) package
+(from [`adjunctions`](https://hackage.haskell.org/package/adjunctions))
 that is suitable for containers with size known only at runtime. The only difference between
 those type classes is that `Memoizer` passes helper information to the `tabulate` function.
 
