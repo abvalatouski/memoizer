@@ -42,3 +42,7 @@ data Store memoizer a
 ```
 
 Currently there is no transformer.
+
+## Is there a documentation?
+
+The source code has a few Haddock-documentation, so you can run `stack haddock` to render it.
