@@ -25,6 +25,8 @@ module Data.Memoizer
     )
   where
 
+import           GHC.Exts            (IsList (Item, fromList))
+
 import           Data.Functor.Rep    (Representable (..))
 import           Data.Hashable       (Hashable)
 import           Data.HashMap.Strict (HashMap)
@@ -76,22 +78,22 @@ instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
     type DomainHint (HashMap k) = [k]
 
-    apply        = (HashMap.!)
-    memoize f ks = let vs = map f ks in HashMap.fromList $ zip ks vs
+    apply   = (HashMap.!)
+    memoize = memoizeKeyValuePairs
 
 instance Ord k => Memoizer (Map k) where
     type Arg        (Map k) = k
     type DomainHint (Map k) = [k]
 
-    apply        = (Map.!)
-    memoize f ks = let vs = map f ks in Map.fromList $ zip ks vs
+    apply   = (Map.!)
+    memoize = memoizeKeyValuePairs
 
 instance Memoizer IntMap where
     type Arg        IntMap = Int
     type DomainHint IntMap = [Int]
 
-    apply        = (IntMap.!)
-    memoize f ks = let vs = map f ks in IntMap.fromList $ zip ks vs
+    apply   = (IntMap.!)
+    memoize = memoizeKeyValuePairs
 
 -- | Used to derive 'Memoizer' instances for all 'Representable' 'Functor's.
 newtype WrappedRepresentable f a = WrapRepresentable
@@ -110,3 +112,10 @@ instance Representable f => Memoizer (WrappedRepresentable f) where
 --
 --   Used when is too boring to write two constraints instead of one.
 class (Functor f, Memoizer f) => Memoizing f
+
+-- Utils.
+
+memoizeKeyValuePairs :: (IsList t, Item t ~ (k, v)) => (k -> v) -> [k] -> t
+memoizeKeyValuePairs f keys =
+    let values = fmap f keys
+     in fromList $ zip keys values
