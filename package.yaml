@@ -10,6 +10,7 @@ library:
     - Control.Comonad.Memoized.Store
     - Data.Memoizer
   dependencies:
+    - adjunctions
     - base
     - comonad
     - hashable

@@ -6,9 +6,12 @@
 -- |
 -- Module : Control.Comonad.Memoized.Store
 --
--- Provides 'Store' 'Comonad' parametrized by a 'Memoized' 'Functor'.
+-- Provides 'Store' 'Comonad' parametrized by a 'Memoizing' 'Functor'.
 module Control.Comonad.Memoized.Store
-    ( Store (Store)
+    ( -- * Store comonad
+      Store
+        ( Store
+        )
 
     -- * Re-exports
     , ComonadStore (..)
@@ -30,7 +33,7 @@ instance Functor g => Functor (Store g) where
     fmap f (Store memoizer domainHint arg) =
         Store (f <$> memoizer) domainHint arg
 
-instance Memoized g => Comonad (Store g) where
+instance Memoizing g => Comonad (Store g) where
     extract (Store memoizer _domainHint arg) =
         memoizer `apply` arg
     
@@ -40,7 +43,7 @@ instance Memoized g => Comonad (Store g) where
       where
         memoize' f = memoize (f domainHint) domainHint
 
-instance (Memoized g, Arg g ~ s) => ComonadStore s (Store g) where
+instance (Memoizing g, Arg g ~ s) => ComonadStore s (Store g) where
     pos     (Store _memoizer _domainHint  arg) = arg
     peek  x (Store  memoizer _domainHint _arg) = memoizer `apply` x
     peeks f (Store  memoizer _domainHint  arg) = memoizer `apply` f arg
