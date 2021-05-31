@@ -24,6 +24,8 @@ class Memoizer t where
 
 Currently there are instances for:
 - all `Representable` functors (wrapped into a `newtype`);
+- `Array` (from [`array`](https://hackage.haskell.org/package/array));
+- `UArray` (from [`array`](https://hackage.haskell.org/package/array));
 - boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
 - `HashMap`
   (from [`unordered-containers`](https://hackage.haskell.org/package/unordered-containers));

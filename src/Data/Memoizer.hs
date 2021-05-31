@@ -1,4 +1,8 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE QuantifiedConstraints #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE UndecidableInstances  #-}
 
 -- |
 -- Module : Data.Memoizer
@@ -27,6 +31,10 @@ module Data.Memoizer
 
 import           GHC.Exts            (IsList (Item, fromList))
 
+import           Data.Array          (Array)
+import           Data.Array.IArray   (IArray, Ix, array)
+import qualified Data.Array.IArray   as IArray
+import           Data.Array.Unboxed  (UArray)
 import           Data.Functor.Rep    (Representable (..))
 import           Data.Hashable       (Hashable)
 import           Data.HashMap.Strict (HashMap)
@@ -65,6 +73,22 @@ class Memoizer t where
     --
     --   Similar to 'tabulate'.
     memoize :: (Arg t -> a) -> DomainHint t -> t a
+
+-- | Defines 'DomainHint' as pair of indices.
+instance (forall e. IArray Array e, Ix i) => Memoizer (Array i) where
+    type Arg        (Array i) = i
+    type DomainHint (Array i) = (i, i)
+
+    apply   = (IArray.!)
+    memoize = memoizeArray
+
+-- | Defines 'DomainHint' as pair of indices.
+instance (forall e. IArray UArray e, Ix i) => Memoizer (UArray i) where
+    type Arg        (UArray i) = i
+    type DomainHint (UArray i) = (i, i)
+
+    apply   = (IArray.!)
+    memoize = memoizeArray
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer Vector where
@@ -119,3 +143,9 @@ memoizeKeyValuePairs :: (IsList t, Item t ~ (k, v)) => (k -> v) -> [k] -> t
 memoizeKeyValuePairs f keys =
     let values = fmap f keys
      in fromList $ zip keys values
+
+memoizeArray :: (IArray a e, Ix i) => (i -> e) -> (i, i) -> a i e
+memoizeArray f bounds =
+    let indices = IArray.range bounds
+        elems   = fmap f indices
+     in array bounds $ zip indices elems

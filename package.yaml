@@ -11,6 +11,7 @@ library:
     - Data.Memoizer
   dependencies:
     - adjunctions
+    - array
     - base
     - comonad
     - containers
