@@ -8,7 +8,7 @@
 -- for containers with size known only at runtime. The only difference between those type classes
 -- is that `Memoizer` passes helper information to the `tabulate` function.
 module Data.Memoizer
-    ( -- * Type class
+    ( -- * Type classes
       Memoizer
         ( Arg
         , DomainHint
