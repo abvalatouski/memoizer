@@ -22,9 +22,13 @@ class Memoizer t where
     memoize :: (Arg t -> a) -> DomainHint t -> t a
 ```
 
-Currently there are instances for `Vector`, `HashMap`
-(from [`unordered-containers`](https://hackage.haskell.org/package/unordered-containers) package),
-and all `Representable` functors (wrapped into a `newtype`).
+Currently there are instances for:
+- all `Representable` functors (wrapped into a `newtype`);
+- boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
+- `HashMap`
+  (from [`unordered-containers`](https://hackage.haskell.org/package/unordered-containers));
+- `Map` (from [`containers`](https://hackage.haskell.org/package/containers));
+- `IntMap` (from [`containers`](https://hackage.haskell.org/package/containers)).
 
 ## `Store` comonad
 

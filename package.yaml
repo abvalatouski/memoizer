@@ -13,6 +13,7 @@ library:
     - adjunctions
     - base
     - comonad
+    - containers
     - hashable
     - unordered-containers
     - vector

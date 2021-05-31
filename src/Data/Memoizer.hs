@@ -28,6 +28,10 @@ import           Data.Functor.Rep    (Representable (..))
 import           Data.Hashable       (Hashable)
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
+import           Data.IntMap         (IntMap)
+import qualified Data.IntMap         as IntMap
+import           Data.Map            (Map)
+import qualified Data.Map            as Map
 import           Data.Vector         (Vector)
 import qualified Data.Vector         as Vector
 
@@ -67,6 +71,20 @@ instance (Eq k, Hashable k) => Memoizer (HashMap k) where
 
     apply        = (HashMap.!)
     memoize f ks = let vs = map f ks in HashMap.fromList $ zip ks vs
+
+instance Ord k => Memoizer (Map k) where
+    type Arg        (Map k) = k
+    type DomainHint (Map k) = [k]
+
+    apply        = (Map.!)
+    memoize f ks = let vs = map f ks in Map.fromList $ zip ks vs
+
+instance Memoizer IntMap where
+    type Arg        IntMap = Int
+    type DomainHint IntMap = [Int]
+
+    apply        = (IntMap.!)
+    memoize f ks = let vs = map f ks in IntMap.fromList $ zip ks vs
 
 -- | Used to define 'Memoizer' to 'Representable' instances.
 newtype WrappedRepresentable f a = WrapRepresentable
