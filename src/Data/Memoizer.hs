@@ -64,6 +64,7 @@ class Memoizer t where
     --   Similar to 'tabulate'.
     memoize :: (Arg t -> a) -> DomainHint t -> t a
 
+-- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
@@ -97,6 +98,7 @@ newtype WrappedRepresentable f a = WrapRepresentable
     { getWrappedRepresentable :: f a
     }
 
+-- | Defines 'DomainHint' as @()@.
 instance Representable f => Memoizer (WrappedRepresentable f) where
     type Arg        (WrappedRepresentable f) = Rep f
     type DomainHint (WrappedRepresentable f) = ()
