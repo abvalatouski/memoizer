@@ -44,7 +44,9 @@ import qualified Data.IntMap         as IntMap
 import           Data.Map            (Map)
 import qualified Data.Map            as Map
 import           Data.Vector         (Vector)
-import qualified Data.Vector         as Vector
+import qualified Data.Vector.Generic as Generic (Vector)
+import qualified Data.Vector.Generic as Generic.Vector
+import qualified Data.Vector.Unboxed as Unboxed (Vector)
 
 -- | Memoizes a particular function.
 --
@@ -95,8 +97,16 @@ instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
 
-    apply   = (Vector.!)
-    memoize = flip Vector.generate
+    apply   = (Generic.Vector.!)
+    memoize = flip Generic.Vector.generate
+
+-- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
+instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector where
+    type Arg        Unboxed.Vector = Int
+    type DomainHint Unboxed.Vector = Int
+
+    apply   = (Generic.Vector.!)
+    memoize = flip Generic.Vector.generate
 
 instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
