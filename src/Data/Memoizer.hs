@@ -115,6 +115,7 @@ instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector 
     apply   = (Generic.Vector.!)
     memoize = flip Generic.Vector.generate
 
+-- | Defines 'DomainHint' as list of keys.
 instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
     type DomainHint (HashMap k) = [k]
@@ -122,6 +123,7 @@ instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     apply   = (HashMap.!)
     memoize = memoizeKeyValuePairs
 
+-- | Defines 'DomainHint' as list of keys.
 instance Ord k => Memoizer (Map k) where
     type Arg        (Map k) = k
     type DomainHint (Map k) = [k]
@@ -129,6 +131,7 @@ instance Ord k => Memoizer (Map k) where
     apply   = (Map.!)
     memoize = memoizeKeyValuePairs
 
+-- | Defines 'DomainHint' as list of keys.
 instance Memoizer IntMap where
     type Arg        IntMap = Int
     type DomainHint IntMap = [Int]
