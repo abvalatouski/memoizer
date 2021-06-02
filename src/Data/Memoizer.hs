@@ -34,24 +34,25 @@ module Data.Memoizer
     )
   where
 
-import           GHC.Exts            (IsList (Item, fromList))
+import           GHC.Exts             (IsList (Item, fromList))
 
-import           Data.Array          (Array)
-import           Data.Array.IArray   (IArray, Ix, array)
-import qualified Data.Array.IArray   as IArray
-import           Data.Array.Unboxed  (UArray)
-import           Data.Functor.Rep    (Representable (..))
-import           Data.Hashable       (Hashable)
-import           Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
-import           Data.IntMap         (IntMap)
-import qualified Data.IntMap         as IntMap
-import           Data.Map            (Map)
-import qualified Data.Map            as Map
-import           Data.Vector         (Vector)
-import qualified Data.Vector.Generic as Generic (Vector)
-import qualified Data.Vector.Generic as Generic.Vector
-import qualified Data.Vector.Unboxed as Unboxed (Vector)
+import           Data.Array           (Array)
+import           Data.Array.IArray    (IArray, Ix, array)
+import qualified Data.Array.IArray    as IArray
+import           Data.Array.Unboxed   (UArray)
+import           Data.Functor.Rep     (Representable (..))
+import           Data.Hashable        (Hashable)
+import           Data.HashMap.Strict  (HashMap)
+import qualified Data.HashMap.Strict  as HashMap
+import           Data.IntMap          (IntMap)
+import qualified Data.IntMap          as IntMap
+import           Data.Map             (Map)
+import qualified Data.Map             as Map
+import           Data.Vector          (Vector)
+import qualified Data.Vector.Generic  as Generic (Vector)
+import qualified Data.Vector.Generic  as Generic.Vector
+import qualified Data.Vector.Storable as Storable (Vector)
+import qualified Data.Vector.Unboxed  as Unboxed (Vector)
 
 -- Type classes.
 
@@ -111,6 +112,14 @@ instance Memoizer Vector where
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector where
     type Arg        Unboxed.Vector = Int
     type DomainHint Unboxed.Vector = Int
+
+    apply   = (Generic.Vector.!)
+    memoize = flip Generic.Vector.generate
+
+-- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
+instance (forall a. Generic.Vector Storable.Vector a) => Memoizer Storable.Vector where
+    type Arg        Storable.Vector = Int
+    type DomainHint Storable.Vector = Int
 
     apply   = (Generic.Vector.!)
     memoize = flip Generic.Vector.generate
@@ -176,6 +185,14 @@ instance Memoizer (Unsafe Vector) where
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer (Unsafe Unboxed.Vector) where
     type Arg        (Unsafe Unboxed.Vector) = Int
     type DomainHint (Unsafe Unboxed.Vector) = Int
+
+    apply   = Generic.Vector.unsafeIndex . getUnsafe
+    memoize = (Unsafe .) . memoize
+
+-- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
+instance (forall a. Generic.Vector Storable.Vector a) => Memoizer (Unsafe Storable.Vector) where
+    type Arg        (Unsafe Storable.Vector) = Int
+    type DomainHint (Unsafe Storable.Vector) = Int
 
     apply   = Generic.Vector.unsafeIndex . getUnsafe
     memoize = (Unsafe .) . memoize
