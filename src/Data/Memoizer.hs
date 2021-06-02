@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE TypeFamilies          #-}
@@ -21,10 +22,14 @@ module Data.Memoizer
         )
     , Memoizing
 
-      -- * Wrapping 'Representable' 'Functor's
+      -- * Type wrappers
     , WrappedRepresentable
         ( WrapRepresentable
         , getWrappedRepresentable
+        )
+    , Unsafe
+        ( Unsafe
+        , getUnsafe
         )
     )
   where
@@ -47,6 +52,8 @@ import           Data.Vector         (Vector)
 import qualified Data.Vector.Generic as Generic (Vector)
 import qualified Data.Vector.Generic as Generic.Vector
 import qualified Data.Vector.Unboxed as Unboxed (Vector)
+
+-- Type classes.
 
 -- | Memoizes a particular function.
 --
@@ -129,6 +136,13 @@ instance Memoizer IntMap where
     apply   = (IntMap.!)
     memoize = memoizeKeyValuePairs
 
+-- | Memoizing functor.
+--
+--   Used when is too boring to write two constraints instead of one.
+class (Functor f, Memoizer f) => Memoizing f
+
+-- Type wrappers.
+
 -- | Used to derive 'Memoizer' instances for all 'Representable' 'Functor's.
 newtype WrappedRepresentable f a = WrapRepresentable
     { getWrappedRepresentable :: f a
@@ -142,10 +156,26 @@ instance Representable f => Memoizer (WrappedRepresentable f) where
     apply   = index . getWrappedRepresentable
     memoize = const . WrapRepresentable . tabulate
 
--- | Memoizing functor.
---
---   Used when is too boring to write two constraints instead of one.
-class (Functor f, Memoizer f) => Memoizing f
+-- | Used to derive 'Memoizer' instances with unsafe indexing.
+newtype Unsafe f a = Unsafe
+    { getUnsafe :: f a
+    }
+
+-- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
+instance Memoizer (Unsafe Vector) where
+    type Arg        (Unsafe Vector) = Int
+    type DomainHint (Unsafe Vector) = Int
+
+    apply   = Generic.Vector.unsafeIndex . getUnsafe
+    memoize = (Unsafe .) . memoize
+
+-- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
+instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer (Unsafe Unboxed.Vector) where
+    type Arg        (Unsafe Unboxed.Vector) = Int
+    type DomainHint (Unsafe Unboxed.Vector) = Int
+
+    apply   = Generic.Vector.unsafeIndex . getUnsafe
+    memoize = (Unsafe .) . memoize
 
 -- Utils.
 

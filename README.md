@@ -28,6 +28,10 @@ Currently there are instances for:
 - `UArray` (from [`array`](https://hackage.haskell.org/package/array));
 - boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
 - unboxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
+- boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector))
+  with unsafe indexing;
+- unboxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector))
+  with unsafe indexing;
 - `HashMap`
   (from [`unordered-containers`](https://hackage.haskell.org/package/unordered-containers));
 - `Map` (from [`containers`](https://hackage.haskell.org/package/containers));
