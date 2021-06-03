@@ -10,8 +10,13 @@
 module Control.Comonad.Memoized.Store
     ( -- * Store comonad
       Store
-        ( Store
+    , store
+    , runStore
+    , StoreT
+        ( StoreT
         )
+    , storeT
+    , runStoreT
 
     -- * Re-exports
     , ComonadStore (..)
@@ -20,32 +25,76 @@ module Control.Comonad.Memoized.Store
 
 import           Control.Comonad
 import           Control.Comonad.Store.Class
+import           Control.Comonad.Trans.Class
+import           Data.Functor.Identity
 
 import           Data.Memoizer
 
 -- | A memoized store comonad.
 --
 --   Currently has no transformer.
-data Store memoizer a
-    = Store (memoizer a) (DomainHint memoizer) (Arg memoizer)
+type Store memoizer = StoreT memoizer Identity
 
-instance Functor g => Functor (Store g) where
-    fmap f (Store memoizer domainHint arg) =
-        Store (f <$> memoizer) domainHint arg
+-- | Constructs an action.
+store ::
+    Memoizer g
+ => (Arg g -> a)
+ -> DomainHint g
+ -> Arg g
+ -> Store g a
+store =
+    storeT . Identity
 
-instance Memoizing g => Comonad (Store g) where
-    extract (Store memoizer _domainHint arg) =
-        memoizer `apply` arg
+-- | Runs an action.
+runStore ::
+    Memoizer g
+ => Store g a
+ -> (Arg g -> a, DomainHint g, Arg g)
+runStore (StoreT (Identity memo) dh arg) =
+    (apply memo, dh, arg)
+
+-- | A memoized store comonad transformer.
+data StoreT memoizer w a 
+    = StoreT (w (memoizer a)) (DomainHint memoizer) (Arg memoizer)
+
+instance (Functor g, Functor w) => Functor (StoreT g w) where
+    fmap f (StoreT wmemo dh arg) =
+        StoreT (fmap f <$> wmemo) dh arg
+
+instance (Memoizing g, Comonad w) => Comonad (StoreT g w) where
+    extract (StoreT wmemo _dh arg) =
+        extract wmemo `apply` arg
     
-    duplicate (Store memoizer domainHint arg) =
-        let memoizer' = (memoize' . Store) memoizer
-         in Store memoizer' domainHint arg
-      where
-        memoize' f = memoize (f domainHint) domainHint
+    duplicate (StoreT wmemo dh arg) =
+        let f wmemo' = memoize (StoreT wmemo' dh) dh
+         in StoreT (extend f wmemo) dh arg
 
-instance (Memoizing g, Arg g ~ s) => ComonadStore s (Store g) where
-    pos     (Store _memoizer _domainHint  arg) = arg
-    peek  x (Store  memoizer _domainHint _arg) = memoizer `apply` x
-    peeks f (Store  memoizer _domainHint  arg) = memoizer `apply` f arg
-    seek  x (Store  memoizer  domainHint _arg) = Store memoizer domainHint x
-    seeks f (Store  memoizer  domainHint  arg) = Store memoizer domainHint (f arg)
+instance (Memoizing g, Comonad w, Arg g ~ s) => ComonadStore s (StoreT g w) where
+    pos     (StoreT _wmemo _dh  arg) = arg
+    peek  x (StoreT  wmemo _dh _arg) = extract wmemo `apply` x
+    peeks f (StoreT  wmemo _dh  arg) = extract wmemo `apply` f arg
+    seek  x (StoreT  wmemo  dh _arg) = StoreT wmemo dh x
+    seeks f (StoreT  wmemo  dh  arg) = StoreT wmemo dh (f arg)
+
+instance Memoizing g => ComonadTrans (StoreT g) where
+    lower (StoreT wmemo _dh arg) =
+        flip apply arg <$> wmemo
+
+-- | Constructs an action.
+storeT ::
+    (Memoizer g, Functor w)
+ => w (Arg g -> a)
+ -> DomainHint g
+ -> Arg g
+ -> StoreT g w a
+storeT wf dh arg =
+    let wmemo = flip memoize dh <$> wf
+     in StoreT wmemo dh arg
+
+-- | Runs an action.
+runStoreT ::
+    (Memoizer g, Functor w)
+ => StoreT g w a
+ -> (w (Arg g -> a), DomainHint g, Arg g)
+runStoreT (StoreT wmemo dh arg) =
+    (apply <$> wmemo, dh, arg)
