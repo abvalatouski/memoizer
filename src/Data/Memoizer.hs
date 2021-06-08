@@ -22,6 +22,9 @@ module Data.Memoizer
         )
     , Memoizing
 
+      -- * Helper functions
+    , memoize'
+
       -- * Type wrappers
     , WrappedRepresentable
         ( WrapRepresentable
@@ -36,6 +39,7 @@ module Data.Memoizer
 
 import           GHC.Exts             (IsList (Item, fromList))
 
+import           Control.DeepSeq      (NFData, force)
 import           Data.Array           (Array)
 import           Data.Array.IArray    (IArray, Ix, array)
 import qualified Data.Array.IArray    as IArray
@@ -199,6 +203,11 @@ instance (forall a. Generic.Vector Storable.Vector a) => Memoizer (Unsafe Storab
 
     apply   = Generic.Vector.unsafeIndex . getUnsafe
     memoize = (Unsafe .) . memoize
+
+-- | Memoizes a particular function
+--   and stores its outputs in /normal form/.
+memoize' :: (Memoizer t, NFData (t a)) => (Arg t -> a) -> DomainHint t -> t a
+memoize' = (force .) . memoize
 
 -- Utils.
 

@@ -15,6 +15,7 @@ library:
     - base
     - comonad
     - containers
+    - deepseq
     - hashable
     - unordered-containers
     - vector
