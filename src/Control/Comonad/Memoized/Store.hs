@@ -49,7 +49,7 @@ runStore ::
  => Store g a
  -> (Arg g -> a, DomainHint g, Arg g)
 runStore (StoreT (Identity memo) dh arg) =
-    (apply memo, dh, arg)
+    (recall memo, dh, arg)
 
 -- | A memoized store comonad transformer.
 data StoreT memoizer w a 
@@ -61,7 +61,7 @@ instance (Functor g, Functor w) => Functor (StoreT g w) where
 
 instance (Memoizing g, Comonad w) => Comonad (StoreT g w) where
     extract (StoreT wmemo _dh arg) =
-        extract wmemo `apply` arg
+        extract wmemo `recall` arg
     
     duplicate (StoreT wmemo dh arg) =
         let f wmemo' = memoize (StoreT wmemo' dh) dh
@@ -69,14 +69,14 @@ instance (Memoizing g, Comonad w) => Comonad (StoreT g w) where
 
 instance (Memoizing g, Comonad w, Arg g ~ s) => ComonadStore s (StoreT g w) where
     pos     (StoreT _wmemo _dh  arg) = arg
-    peek  x (StoreT  wmemo _dh _arg) = extract wmemo `apply` x
-    peeks f (StoreT  wmemo _dh  arg) = extract wmemo `apply` f arg
+    peek  x (StoreT  wmemo _dh _arg) = extract wmemo `recall` x
+    peeks f (StoreT  wmemo _dh  arg) = extract wmemo `recall` f arg
     seek  x (StoreT  wmemo  dh _arg) = StoreT wmemo dh x
     seeks f (StoreT  wmemo  dh  arg) = StoreT wmemo dh (f arg)
 
 instance Memoizing g => ComonadTrans (StoreT g) where
     lower (StoreT wmemo _dh arg) =
-        flip apply arg <$> wmemo
+        flip recall arg <$> wmemo
 
 -- | Constructs an action.
 storeT ::
@@ -95,4 +95,4 @@ runStoreT ::
  => StoreT g w a
  -> (w (Arg g -> a), DomainHint g, Arg g)
 runStoreT (StoreT wmemo dh arg) =
-    (apply <$> wmemo, dh, arg)
+    (recall <$> wmemo, dh, arg)
