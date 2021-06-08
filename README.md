@@ -27,6 +27,10 @@ Currently there are instances for:
 - all `Representable` functors (wrapped into a `newtype`);
 - `Array` (from [`array`](https://hackage.haskell.org/package/array));
 - `UArray` (from [`array`](https://hackage.haskell.org/package/array));
+- `Array` (from [`array`](https://hackage.haskell.org/package/array))
+  with unsafe indexing;
+- `UArray` (from [`array`](https://hackage.haskell.org/package/array))
+  with unsafe indexing;
 - boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
 - unboxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
 - storable `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));

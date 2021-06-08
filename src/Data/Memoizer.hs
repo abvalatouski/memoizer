@@ -207,6 +207,22 @@ newtype Unsafe f a = Unsafe
     { getUnsafe :: f a
     }
 
+-- | Defines 'DomainHint' as pair of indices.
+instance (forall e. IArray Array e, Ix i) => Memoizer (Unsafe (Array i)) where
+    type Arg        (Unsafe (Array i)) = i
+    type DomainHint (Unsafe (Array i)) = (i, i)
+
+    memoize = (Unsafe .) . memoizeArray
+    recall  = unsafeArrayIndex . getUnsafe
+
+-- | Defines 'DomainHint' as pair of indices.
+instance (forall e. IArray UArray e, Ix i) => Memoizer (Unsafe (UArray i)) where
+    type Arg        (Unsafe (UArray i)) = i
+    type DomainHint (Unsafe (UArray i)) = (i, i)
+
+    memoize = (Unsafe . ) . memoizeArray
+    recall  = unsafeArrayIndex . getUnsafe
+
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer (Unsafe Vector) where
     type Arg        (Unsafe Vector) = Int
@@ -243,6 +259,11 @@ memoizeArray f bounds =
     let indices = IArray.range bounds
         elems   = fmap f indices
      in IArray.array bounds $ zip indices elems
+
+unsafeArrayIndex :: (IArray a e, Ix i) => a i e -> i -> e
+unsafeArrayIndex array index =
+    let i = IArray.index (IArray.bounds array) index
+     in array `Array.unsafeAt` i
 
 safeArrayIndex :: (IArray a e, Ix i) => a i e -> i -> Maybe e
 safeArrayIndex array index
