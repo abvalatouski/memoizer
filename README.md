@@ -21,6 +21,8 @@ class Memoizer t where
     -- index
     recall      :: t a -> Arg t ->       a
     recallMaybe :: t a -> Arg t -> Maybe a
+
+    {-# MINIMAL remember, (recall | recallMaybe) #-}
 ```
 
 Currently there are instances for:
