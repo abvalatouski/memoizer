@@ -65,7 +65,7 @@ import qualified Data.Vector.Unboxed  as Unboxed (Vector)
 --   Similar to 'Representable'.
 --
 --   NOTE:
---   Almost all instances of that type class does not satisfy the laws of 'Representable'.
+--   Almost all the instances of that type class do not satisfy the laws of 'Representable'.
 class Memoizer t where
     -- | Argument of the function.
     --
