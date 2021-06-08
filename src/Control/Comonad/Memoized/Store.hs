@@ -65,7 +65,7 @@ instance (Functor g, Memoizer g, Comonad w) => Comonad (StoreT g w) where
         extract wmemo `recall` arg
     
     duplicate (StoreT wmemo dh arg) =
-        let f wmemo' = memoize (StoreT wmemo' dh) dh
+        let f wmemo' = remember (StoreT wmemo' dh) dh
          in StoreT (extend f wmemo) dh arg
 
 instance (Functor g, Memoizer g, Comonad w, Arg g ~ s) => ComonadStore s (StoreT g w) where
@@ -87,7 +87,7 @@ storeT ::
  -> Arg g
  -> StoreT g w a
 storeT wf dh arg =
-    let wmemo = flip memoize dh <$> wf
+    let wmemo = flip remember dh <$> wf
      in StoreT wmemo dh arg
 
 -- | Runs an action.

@@ -17,13 +17,13 @@ module Data.Memoizer
       Memoizer
         ( Arg
         , DomainHint
-        , memoize
+        , remember
         , recall
         , recallMaybe
         )
 
       -- * Helper functions
-    , memoize'
+    , remember'
 
       -- * Type wrappers
     , WrappedRepresentable
@@ -71,7 +71,7 @@ class Memoizer t where
     --   Similar to 'Rep'.
     type Arg t
 
-    -- | Helps memoizer to know all possible function inputs (i.e. /domain/).
+    -- | Helps rememberr to know all possible function inputs (i.e. /domain/).
     --
     --   Generally speaking, it should be represented as a list of values. However, in some cases,
     --   the list can be stored /implicitly/. For example, an array of values, as a function
@@ -83,7 +83,7 @@ class Memoizer t where
     -- | Memoizes the function.
     --
     --   Similar to 'tabulate'.
-    memoize :: (Arg t -> a) -> DomainHint t -> t a
+    remember :: (Arg t -> a) -> DomainHint t -> t a
 
     -- | Applies the function to the argument.
     --
@@ -108,14 +108,14 @@ class Memoizer t where
     recallMaybe :: t a -> Arg t -> Maybe a
     recallMaybe = (Just .) . recall
 
-    {-# MINIMAL memoize, (recall | recallMaybe) #-}
+    {-# MINIMAL remember, (recall | recallMaybe) #-}
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray Array e, Ix i) => Memoizer (Array i) where
     type Arg        (Array i) = i
     type DomainHint (Array i) = (i, i)
 
-    memoize     = memoizeArray
+    remember    = memoizeArray
     recallMaybe = safeArrayIndex
 
 -- | Defines 'DomainHint' as pair of indices.
@@ -123,7 +123,7 @@ instance (forall e. IArray UArray e, Ix i) => Memoizer (UArray i) where
     type Arg        (UArray i) = i
     type DomainHint (UArray i) = (i, i)
 
-    memoize     = memoizeArray
+    remember    = memoizeArray
     recallMaybe = safeArrayIndex
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
@@ -131,7 +131,7 @@ instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
 
-    memoize     = flip Generic.Vector.generate
+    remember    = flip Generic.Vector.generate
     recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
@@ -139,7 +139,7 @@ instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector 
     type Arg        Unboxed.Vector = Int
     type DomainHint Unboxed.Vector = Int
 
-    memoize     = flip Generic.Vector.generate
+    remember     = flip Generic.Vector.generate
     recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
@@ -147,7 +147,7 @@ instance (forall a. Generic.Vector Storable.Vector a) => Memoizer Storable.Vecto
     type Arg        Storable.Vector = Int
     type DomainHint Storable.Vector = Int
 
-    memoize     = flip Generic.Vector.generate
+    remember    = flip Generic.Vector.generate
     recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as list of keys.
@@ -155,7 +155,7 @@ instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
     type DomainHint (HashMap k) = [k]
 
-    memoize     = memoizeKeyValuePairs
+    remember    = memoizeKeyValuePairs
     recallMaybe = flip HashMap.lookup
 
 -- | Defines 'DomainHint' as list of keys.
@@ -163,7 +163,7 @@ instance Ord k => Memoizer (Map k) where
     type Arg        (Map k) = k
     type DomainHint (Map k) = [k]
 
-    memoize     = memoizeKeyValuePairs
+    remember    = memoizeKeyValuePairs
     recallMaybe = flip Map.lookup
 
 -- | Defines 'DomainHint' as list of keys.
@@ -171,15 +171,15 @@ instance Memoizer IntMap where
     type Arg        IntMap = Int
     type DomainHint IntMap = [Int]
 
-    memoize     = memoizeKeyValuePairs
+    remember    = memoizeKeyValuePairs
     recallMaybe = flip IntMap.lookup
 
 -- Helper functions.
 
 -- | Memoizes a particular function
 --   and stores its outputs in /normal form/.
-memoize' :: (Memoizer t, NFData (t a)) => (Arg t -> a) -> DomainHint t -> t a
-memoize' = (force .) . memoize
+remember' :: (Memoizer t, NFData (t a)) => (Arg t -> a) -> DomainHint t -> t a
+remember' = (force .) . remember
 
 -- Type wrappers.
 
@@ -193,8 +193,8 @@ instance Representable f => Memoizer (WrappedRepresentable f) where
     type Arg        (WrappedRepresentable f) = Rep f
     type DomainHint (WrappedRepresentable f) = ()
 
-    memoize = const . WrapRepresentable . tabulate
-    recall  = index . getWrappedRepresentable
+    remember = const . WrapRepresentable . tabulate
+    recall   = index . getWrappedRepresentable
 
 -- | Used to derive 'Memoizer' instances with unsafe indexing.
 newtype Unsafe f a = Unsafe
@@ -206,40 +206,40 @@ instance (forall e. IArray Array e, Ix i) => Memoizer (Unsafe (Array i)) where
     type Arg        (Unsafe (Array i)) = i
     type DomainHint (Unsafe (Array i)) = (i, i)
 
-    memoize = (Unsafe .) . memoizeArray
-    recall  = unsafeArrayIndex . getUnsafe
+    remember = (Unsafe .) . memoizeArray
+    recall   = unsafeArrayIndex . getUnsafe
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray UArray e, Ix i) => Memoizer (Unsafe (UArray i)) where
     type Arg        (Unsafe (UArray i)) = i
     type DomainHint (Unsafe (UArray i)) = (i, i)
 
-    memoize = (Unsafe . ) . memoizeArray
-    recall  = unsafeArrayIndex . getUnsafe
+    remember = (Unsafe . ) . memoizeArray
+    recall   = unsafeArrayIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer (Unsafe Vector) where
     type Arg        (Unsafe Vector) = Int
     type DomainHint (Unsafe Vector) = Int
 
-    memoize = (Unsafe .) . memoize
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
+    remember = (Unsafe .) . remember
+    recall   = Generic.Vector.unsafeIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer (Unsafe Unboxed.Vector) where
     type Arg        (Unsafe Unboxed.Vector) = Int
     type DomainHint (Unsafe Unboxed.Vector) = Int
 
-    memoize = (Unsafe .) . memoize
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
+    remember = (Unsafe .) . remember
+    recall   = Generic.Vector.unsafeIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
 instance (forall a. Generic.Vector Storable.Vector a) => Memoizer (Unsafe Storable.Vector) where
     type Arg        (Unsafe Storable.Vector) = Int
     type DomainHint (Unsafe Storable.Vector) = Int
 
-    memoize = (Unsafe .) . memoize
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
+    remember = (Unsafe .) . remember
+    recall   = Generic.Vector.unsafeIndex . getUnsafe
 
 -- Utils.
 
