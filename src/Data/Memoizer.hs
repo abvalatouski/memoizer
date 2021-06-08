@@ -220,7 +220,7 @@ instance (forall e. IArray UArray e, Ix i) => Memoizer (Unsafe (UArray i)) where
     type Arg        (Unsafe (UArray i)) = i
     type DomainHint (Unsafe (UArray i)) = (i, i)
 
-    remember = (Unsafe . ) . memoizeArray
+    remember = (Unsafe .) . memoizeArray
     recall   = unsafeArrayIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
