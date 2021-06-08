@@ -19,6 +19,7 @@ module Control.Comonad.Memoized.Store
     , runStoreT
 
     -- * Re-exports
+    , Comonad (..)
     , ComonadStore (..)
     )
   where
