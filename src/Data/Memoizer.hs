@@ -21,7 +21,6 @@ module Data.Memoizer
         , recall
         , recallMaybe
         )
-    , Memoizing
 
       -- * Helper functions
     , memoize'
@@ -174,11 +173,6 @@ instance Memoizer IntMap where
 
     memoize     = memoizeKeyValuePairs
     recallMaybe = flip IntMap.lookup
-
--- | Memoizing functor.
---
---   Used when is too boring to write two constraints instead of one.
-class (Functor f, Memoizer f) => Memoizing f
 
 -- Helper functions.
 

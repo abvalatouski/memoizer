@@ -59,7 +59,7 @@ instance (Functor g, Functor w) => Functor (StoreT g w) where
     fmap f (StoreT wmemo dh arg) =
         StoreT (fmap f <$> wmemo) dh arg
 
-instance (Memoizing g, Comonad w) => Comonad (StoreT g w) where
+instance (Functor g, Memoizer g, Comonad w) => Comonad (StoreT g w) where
     extract (StoreT wmemo _dh arg) =
         extract wmemo `recall` arg
     
@@ -67,14 +67,14 @@ instance (Memoizing g, Comonad w) => Comonad (StoreT g w) where
         let f wmemo' = memoize (StoreT wmemo' dh) dh
          in StoreT (extend f wmemo) dh arg
 
-instance (Memoizing g, Comonad w, Arg g ~ s) => ComonadStore s (StoreT g w) where
+instance (Functor g, Memoizer g, Comonad w, Arg g ~ s) => ComonadStore s (StoreT g w) where
     pos     (StoreT _wmemo _dh  arg) = arg
     peek  x (StoreT  wmemo _dh _arg) = extract wmemo `recall` x
     peeks f (StoreT  wmemo _dh  arg) = extract wmemo `recall` f arg
     seek  x (StoreT  wmemo  dh _arg) = StoreT wmemo dh x
     seeks f (StoreT  wmemo  dh  arg) = StoreT wmemo dh (f arg)
 
-instance Memoizing g => ComonadTrans (StoreT g) where
+instance (Functor g, Memoizer g) => ComonadTrans (StoreT g) where
     lower (StoreT wmemo _dh arg) =
         flip recall arg <$> wmemo
 
