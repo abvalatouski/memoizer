@@ -267,8 +267,8 @@ unsafeArrayIndex array index =
 
 safeArrayIndex :: (IArray a e, Ix i) => a i e -> i -> Maybe e
 safeArrayIndex array index
-    | i >= 0 && i <= n = Just $ array `Array.unsafeAt` i
-    | otherwise        = Nothing
+    | i >= 0 && i < n = Just $ array `Array.unsafeAt` i
+    | otherwise       = Nothing
   where
     i = IArray.index (IArray.bounds array) index
     n = Array.numElements array
