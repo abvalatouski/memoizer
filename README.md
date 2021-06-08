@@ -19,7 +19,8 @@ class Memoizer t where
     memoize :: (Arg t -> a) -> DomainHint t -> t a
 
     -- index
-    recall :: t a -> Arg t -> a
+    recall      :: t a -> Arg t ->       a
+    recallMaybe :: t a -> Arg t -> Maybe a
 ```
 
 Currently there are instances for:

@@ -17,8 +17,9 @@ module Data.Memoizer
       Memoizer
         ( Arg
         , DomainHint
-        , recall
         , memoize
+        , recall
+        , recallMaybe
         )
     , Memoizing
 
@@ -37,11 +38,13 @@ module Data.Memoizer
     )
   where
 
+import           Data.Maybe
 import           GHC.Exts             (IsList (Item, fromList))
 
 import           Control.DeepSeq      (NFData, force)
 import           Data.Array           (Array)
-import           Data.Array.IArray    (IArray, Ix, array)
+import qualified Data.Array.Base      as Array
+import           Data.Array.IArray    (IArray, Ix)
 import qualified Data.Array.IArray    as IArray
 import           Data.Array.Unboxed   (UArray)
 import           Data.Functor.Rep     (Representable (..))
@@ -92,70 +95,85 @@ class Memoizer t where
     --   functions and data structures does not exist, and thus the laws of 'Representable'
     --   are /not satisfied/.
     recall :: t a -> Arg t -> a
+    recall = (fromMaybe bomb .) . recallMaybe
+      where
+        bomb = error "recall: Memoized function does not provide a value for the given input."
+
+    -- | Applies the function to the argument.
+    --
+    --   Similar to 'index'.
+    --
+    --   NOTE:
+    --   'Maybe' breaks isomorphism between functions and data structures, and thus the laws
+    --   of 'Representable' are /not satisfied/.
+    recallMaybe :: t a -> Arg t -> Maybe a
+    recallMaybe = (Just .) . recall
+
+    {-# MINIMAL memoize, (recall | recallMaybe) #-}
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray Array e, Ix i) => Memoizer (Array i) where
     type Arg        (Array i) = i
     type DomainHint (Array i) = (i, i)
 
-    memoize = memoizeArray
-    recall  = (IArray.!)
+    memoize     = memoizeArray
+    recallMaybe = safeArrayIndex
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray UArray e, Ix i) => Memoizer (UArray i) where
     type Arg        (UArray i) = i
     type DomainHint (UArray i) = (i, i)
 
-    memoize = memoizeArray
-    recall  = (IArray.!)
+    memoize     = memoizeArray
+    recallMaybe = safeArrayIndex
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
 
-    memoize = flip Generic.Vector.generate
-    recall  = (Generic.Vector.!)
+    memoize     = flip Generic.Vector.generate
+    recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector where
     type Arg        Unboxed.Vector = Int
     type DomainHint Unboxed.Vector = Int
 
-    memoize = flip Generic.Vector.generate
-    recall  = (Generic.Vector.!)
+    memoize     = flip Generic.Vector.generate
+    recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
 instance (forall a. Generic.Vector Storable.Vector a) => Memoizer Storable.Vector where
     type Arg        Storable.Vector = Int
     type DomainHint Storable.Vector = Int
 
-    memoize = flip Generic.Vector.generate
-    recall  = (Generic.Vector.!)
+    memoize     = flip Generic.Vector.generate
+    recallMaybe = (Generic.Vector.!?)
 
 -- | Defines 'DomainHint' as list of keys.
 instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
     type DomainHint (HashMap k) = [k]
 
-    memoize = memoizeKeyValuePairs
-    recall  = (HashMap.!)
+    memoize     = memoizeKeyValuePairs
+    recallMaybe = flip HashMap.lookup
 
 -- | Defines 'DomainHint' as list of keys.
 instance Ord k => Memoizer (Map k) where
     type Arg        (Map k) = k
     type DomainHint (Map k) = [k]
 
-    memoize = memoizeKeyValuePairs
-    recall  = (Map.!)
+    memoize     = memoizeKeyValuePairs
+    recallMaybe = flip Map.lookup
 
 -- | Defines 'DomainHint' as list of keys.
 instance Memoizer IntMap where
     type Arg        IntMap = Int
     type DomainHint IntMap = [Int]
 
-    memoize = memoizeKeyValuePairs
-    recall  = (IntMap.!)
+    memoize     = memoizeKeyValuePairs
+    recallMaybe = flip IntMap.lookup
 
 -- | Memoizing functor.
 --
@@ -224,4 +242,11 @@ memoizeArray :: (IArray a e, Ix i) => (i -> e) -> (i, i) -> a i e
 memoizeArray f bounds =
     let indices = IArray.range bounds
         elems   = fmap f indices
-     in array bounds $ zip indices elems
+     in IArray.array bounds $ zip indices elems
+
+safeArrayIndex :: (IArray a e, Ix i) => a i e -> i -> Maybe e
+safeArrayIndex array index
+    | i >= 0    = Just $ array `Array.unsafeAt` i
+    | otherwise = Nothing
+  where
+    i = IArray.index (IArray.bounds array) index
