@@ -24,16 +24,17 @@ class Memoizer t where
 
     {-# MINIMAL remember, (recall | recallMaybe) #-}
 ```
+
 ## Instances
 
-| Data type                       | Does support unsafe indexing? |
-| ------------------------------- | ----------------------------- |
-| any `Representable` `Functor`   |                               |
-| `Array`, `UArray`               | Yes                           |
-| boxed/unboxed/storable `Vector` | Yes                           |
-| `HashMap`                       |                               |
-| `Map`                           |                               |
-| `IntMap`                        |                               |
+| Data type                       | `Arg`                      | `DomainHint`                                          | Does support unsafe indexing? |
+| ------------------------------- | -------------------------- | ----------------------------------------------------- | ----------------------------- |
+| any `Representable` `Functor`   | `Representable f => Rep f` | `()` (none)                                           |                               |
+| `Array`, `UArray`               | `Ix i => i`                | `Ix i => (i, i)` (range of the array)                 | Yes                           |
+| boxed/unboxed/storable `Vector` | `Int`                      | `Int` (length of the array)                           | Yes                           |
+| `HashMap`                       | `(Hashable k, Eq k) => k`  | `(Hashable k, Eq k) => [k]` (all the function inputs) |                               |
+| `Map`                           | `Ord k => k`               | `Ord k => [k]` (all the function inputs)              |                               |
+| `IntMap`                        | `Int`                      | `[Int]` (all the function inputs)                     |                               |
 
 ## `Store` comonad
 
@@ -46,4 +47,4 @@ data StoreT memoizer w a
 
 ## Is there a documentation?
 
-The source code has a few Haddock-documentation, so you can run `stack haddock` to render it.
+The source code has a few Haddock documentation, so you can run `stack haddock` to render it.
