@@ -24,6 +24,7 @@ module Data.Memoizer
 
       -- * Helper functions
     , remember'
+    , recallOrDefault
 
       -- * Type wrappers
     , WrappedRepresentable
@@ -180,6 +181,11 @@ instance Memoizer IntMap where
 --   and stores its outputs in /normal form/.
 remember' :: (Memoizer t, NFData (t a)) => (Arg t -> a) -> DomainHint t -> t a
 remember' = (force .) . remember
+
+-- | Applies the argument to the memoized function.
+--   When the function does provide a value for the argument, evaluates the default value.
+recallOrDefault :: Memoizer t => a -> t a -> Arg t -> a
+recallOrDefault def = (fromMaybe def .) . recallMaybe
 
 -- Type wrappers.
 
