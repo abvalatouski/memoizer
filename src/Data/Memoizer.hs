@@ -13,7 +13,7 @@
 -- for containers with size known only at runtime. The only difference between those type classes
 -- is that `Memoizer` passes helper information to the `tabulate` function.
 module Data.Memoizer
-    ( -- * Type classes
+    ( -- * Type class
       Memoizer
         ( Arg
         , DomainHint
@@ -60,7 +60,7 @@ import qualified Data.Vector.Generic  as Generic.Vector
 import qualified Data.Vector.Storable as Storable (Vector)
 import qualified Data.Vector.Unboxed  as Unboxed (Vector)
 
--- Type classes.
+-- Type class.
 
 -- | Memoizes a particular function.
 --
