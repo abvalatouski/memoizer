@@ -31,8 +31,6 @@ import           Data.Functor.Identity
 import           Data.Memoizer
 
 -- | A memoized store comonad.
---
---   Currently has no transformer.
 type Store memoizer = StoreT memoizer Identity
 
 -- | Constructs an action.
