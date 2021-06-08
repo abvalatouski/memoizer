@@ -63,9 +63,6 @@ import qualified Data.Vector.Unboxed  as Unboxed (Vector)
 -- | Memoizes a particular function.
 --
 --   Similar to 'Representable'.
---
---   NOTE:
---   Almost all the instances of that type class do not satisfy the laws of 'Representable'.
 class Memoizer t where
     -- | Argument of the function.
     --
@@ -89,6 +86,11 @@ class Memoizer t where
     -- | Applies the function to the argument.
     --
     --   Similar to 'index'.
+    --
+    --   NOTE:
+    --   Usually implementations of that function are /not total/, thus the isomorphism between
+    --   functions and data structures does not exist, and thus the laws of 'Representable'
+    --   are /not satisfied/.
     recall :: t a -> Arg t -> a
 
 -- | Defines 'DomainHint' as pair of indices.
