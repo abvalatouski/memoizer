@@ -24,28 +24,16 @@ class Memoizer t where
 
     {-# MINIMAL remember, (recall | recallMaybe) #-}
 ```
+## Instances
 
-Currently there are instances for:
-- all `Representable` functors (wrapped into a `newtype`);
-- `Array` (from [`array`](https://hackage.haskell.org/package/array));
-- `UArray` (from [`array`](https://hackage.haskell.org/package/array));
-- `Array` (from [`array`](https://hackage.haskell.org/package/array))
-  with unsafe indexing;
-- `UArray` (from [`array`](https://hackage.haskell.org/package/array))
-  with unsafe indexing;
-- boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
-- unboxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
-- storable `Vector` (from [`vector`](https://hackage.haskell.org/package/vector));
-- boxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector))
-  with unsafe indexing;
-- unboxed `Vector` (from [`vector`](https://hackage.haskell.org/package/vector))
-  with unsafe indexing;
-- storable `Vector` (from [`vector`](https://hackage.haskell.org/package/vector))
-  with unsafe indexing;
-- `HashMap`
-  (from [`unordered-containers`](https://hackage.haskell.org/package/unordered-containers));
-- `Map` (from [`containers`](https://hackage.haskell.org/package/containers));
-- `IntMap` (from [`containers`](https://hackage.haskell.org/package/containers)).
+| Data type                       | Does support unsafe indexing? |
+| ------------------------------- | ----------------------------- |
+| any `Representable` `Functor`   |                               |
+| `Array`, `UArray`               | Yes                           |
+| boxed/unboxed/storable `Vector` | Yes                           |
+| `HashMap`                       |                               |
+| `Map`                           |                               |
+| `IntMap`                        |                               |
 
 ## `Store` comonad
 
