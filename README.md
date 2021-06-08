@@ -15,11 +15,11 @@ class Memoizer t where
     -- Helps memoizer to know all possible function inputs.
     type DomainHint t
 
-    -- index
-    recall :: t a -> Arg t -> a
-
     -- tabulate
     memoize :: (Arg t -> a) -> DomainHint t -> t a
+
+    -- index
+    recall :: t a -> Arg t -> a
 ```
 
 Currently there are instances for:

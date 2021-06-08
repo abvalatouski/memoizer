@@ -81,79 +81,79 @@ class Memoizer t where
     --   'DomainHint' as @()@.
     type DomainHint t
 
-    -- | Applies the function to the argument.
-    --
-    --   Similar to 'index'.
-    recall :: t a -> Arg t -> a
-
     -- | Memoizes the function.
     --
     --   Similar to 'tabulate'.
     memoize :: (Arg t -> a) -> DomainHint t -> t a
+
+    -- | Applies the function to the argument.
+    --
+    --   Similar to 'index'.
+    recall :: t a -> Arg t -> a
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray Array e, Ix i) => Memoizer (Array i) where
     type Arg        (Array i) = i
     type DomainHint (Array i) = (i, i)
 
-    recall  = (IArray.!)
     memoize = memoizeArray
+    recall  = (IArray.!)
 
 -- | Defines 'DomainHint' as pair of indices.
 instance (forall e. IArray UArray e, Ix i) => Memoizer (UArray i) where
     type Arg        (UArray i) = i
     type DomainHint (UArray i) = (i, i)
 
-    recall  = (IArray.!)
     memoize = memoizeArray
+    recall  = (IArray.!)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Vector').
 instance Memoizer Vector where
     type Arg        Vector = Int
     type DomainHint Vector = Int
 
-    recall  = (Generic.Vector.!)
     memoize = flip Generic.Vector.generate
+    recall  = (Generic.Vector.!)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer Unboxed.Vector where
     type Arg        Unboxed.Vector = Int
     type DomainHint Unboxed.Vector = Int
 
-    recall  = (Generic.Vector.!)
     memoize = flip Generic.Vector.generate
+    recall  = (Generic.Vector.!)
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
 instance (forall a. Generic.Vector Storable.Vector a) => Memoizer Storable.Vector where
     type Arg        Storable.Vector = Int
     type DomainHint Storable.Vector = Int
 
-    recall  = (Generic.Vector.!)
     memoize = flip Generic.Vector.generate
+    recall  = (Generic.Vector.!)
 
 -- | Defines 'DomainHint' as list of keys.
 instance (Eq k, Hashable k) => Memoizer (HashMap k) where
     type Arg        (HashMap k) = k
     type DomainHint (HashMap k) = [k]
 
-    recall  = (HashMap.!)
     memoize = memoizeKeyValuePairs
+    recall  = (HashMap.!)
 
 -- | Defines 'DomainHint' as list of keys.
 instance Ord k => Memoizer (Map k) where
     type Arg        (Map k) = k
     type DomainHint (Map k) = [k]
 
-    recall  = (Map.!)
     memoize = memoizeKeyValuePairs
+    recall  = (Map.!)
 
 -- | Defines 'DomainHint' as list of keys.
 instance Memoizer IntMap where
     type Arg        IntMap = Int
     type DomainHint IntMap = [Int]
 
-    recall  = (IntMap.!)
     memoize = memoizeKeyValuePairs
+    recall  = (IntMap.!)
 
 -- | Memoizing functor.
 --
@@ -179,8 +179,8 @@ instance Representable f => Memoizer (WrappedRepresentable f) where
     type Arg        (WrappedRepresentable f) = Rep f
     type DomainHint (WrappedRepresentable f) = ()
 
-    recall  = index . getWrappedRepresentable
     memoize = const . WrapRepresentable . tabulate
+    recall  = index . getWrappedRepresentable
 
 -- | Used to derive 'Memoizer' instances with unsafe indexing.
 newtype Unsafe f a = Unsafe
@@ -192,24 +192,24 @@ instance Memoizer (Unsafe Vector) where
     type Arg        (Unsafe Vector) = Int
     type DomainHint (Unsafe Vector) = Int
 
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
     memoize = (Unsafe .) . memoize
+    recall  = Generic.Vector.unsafeIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Unboxed.Vector').
 instance (forall a. Generic.Vector Unboxed.Vector a) => Memoizer (Unsafe Unboxed.Vector) where
     type Arg        (Unsafe Unboxed.Vector) = Int
     type DomainHint (Unsafe Unboxed.Vector) = Int
 
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
     memoize = (Unsafe .) . memoize
+    recall  = Generic.Vector.unsafeIndex . getUnsafe
 
 -- | Defines 'DomainHint' as 'Int' (length of the 'Storable.Vector').
 instance (forall a. Generic.Vector Storable.Vector a) => Memoizer (Unsafe Storable.Vector) where
     type Arg        (Unsafe Storable.Vector) = Int
     type DomainHint (Unsafe Storable.Vector) = Int
 
-    recall  = Generic.Vector.unsafeIndex . getUnsafe
     memoize = (Unsafe .) . memoize
+    recall  = Generic.Vector.unsafeIndex . getUnsafe
 
 -- Utils.
 
