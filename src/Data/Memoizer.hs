@@ -72,7 +72,7 @@ class Memoizer t where
     --   Similar to 'Rep'.
     type Arg t
 
-    -- | Helps rememberr to know all possible function inputs (i.e. /domain/).
+    -- | Helps memoizer to know all possible function inputs (i.e. /domain/).
     --
     --   Generally speaking, it should be represented as a list of values. However, in some cases,
     --   the list can be stored /implicitly/. For example, an array of values, as a function
